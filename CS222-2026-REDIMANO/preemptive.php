@@ -13,7 +13,6 @@
             font-family: 'Inter', sans-serif;
             text-align: center;
             padding: 100px 20px 60px; 
-            /* DARK GRADIENT BACKGROUND */
             background-color: #0d0628;
             background: radial-gradient(circle at 50% 0%, #3b117a 0%, #150833 45%, #0d0628 100%);
             color: #ffffff;
@@ -81,7 +80,6 @@
             background: rgba(0,0,0,0.3); padding: 40px; border-radius: 25px; 
             border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; 
         }
-        /* GANTT BLOCKS NEON COLORS */
         .gantt-block { 
             height: 55px; margin-right: 4px; display: flex; align-items: center; 
             justify-content: center; color: #000; font-weight: 800; border-radius: 8px; 
@@ -261,3 +259,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['arrival_time'])) {
 ?>
 </body>
 </html>
+
