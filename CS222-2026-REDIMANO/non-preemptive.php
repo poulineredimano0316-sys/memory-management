@@ -5,111 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CPU Scheduling - Non-Preemptive</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
             text-align: center;
-            padding: 80px 20px 40px; 
-            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 40%, #d1fae5 70%, #fce7f3 100%);
-            color: #312e81;
+            padding: 100px 20px 60px; 
+            /* DARK GRADIENT BACKGROUND */
+            background-color: #0d0628;
+            background: radial-gradient(circle at 50% 0%, #3b117a 0%, #150833 45%, #0d0628 100%);
+            color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
         }
+        body::before {
+            content: ''; position: fixed; top: 10%; left: 50%; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.08) 0%, rgba(255, 0, 212, 0.05) 40%, transparent 70%);
+            transform: translateX(-50%); z-index: -1; pointer-events: none;
+        }
+
         .top-menu {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: flex;
-            gap: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.5);
-            white-space: nowrap;
+            position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            padding: 8px 15px; border-radius: 50px; display: flex; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .top-menu a {
-            text-decoration: none;
-            color: #312e81;
-            font-weight: 700;
-            padding: 8px 15px;
-            border-radius: 20px;
-            transition: 0.3s;
-            font-size: 0.9rem;
+            text-decoration: none; color: rgba(255,255,255,0.6); font-weight: 700;
+            padding: 8px 20px; border-radius: 40px; transition: 0.3s; font-size: 0.85rem;
         }
 
-        .top-menu a.active { background: #312e81; color: white; }
-        .top-menu a:hover:not(.active) { background: #e0e7ff; }
+        .top-menu a.active { background: #00f2ff; color: #000; box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
 
         .back-button { 
-            position: fixed; 
-            bottom: 25px; 
-            left: 25px; 
-            padding: 12px 25px; 
-            font-weight: 700; 
-            background: white; 
-            color: #312e81; 
-            border-radius: 100px; 
-            text-decoration: none; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-            transition: 0.3s; 
-            z-index: 1100; 
-            border: 1px solid #e2e8f0; 
+            position: fixed; bottom: 30px; left: 30px; padding: 12px 25px; 
+            font-weight: 700; background: rgba(255,255,255,0.08); color: white; 
+            border-radius: 100px; text-decoration: none; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; z-index: 1100;
         }
-        .back-button:hover { background: #312e81; color: white; transform: translateY(-3px); }
+        .back-button:hover { background: #00f2ff; color: #000; }
 
-        /* Liquid blobs */
-        .blob { position: fixed; z-index: -1; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; filter: blur(8px); animation: morph 10s ease-in-out infinite alternate; }
-        .blob1 { width: clamp(250px, 40vw, 400px); height: clamp(250px, 40vw, 400px); top: -100px; right: -50px; background: linear-gradient(135deg, #a5b4fc, #fbcfe8); }
-        .blob2 { width: clamp(200px, 35vw, 350px); height: clamp(200px, 35vw, 350px); bottom: -80px; left: -50px; background: linear-gradient(135deg, #6ee7b7, #93c5fd); animation-delay: -2s; }
+        h2 { font-family: 'Archivo Black', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem); margin-bottom: 40px; text-transform: uppercase; letter-spacing: -1px; }
+        h3 { font-family: 'Archivo Black', sans-serif; margin: 50px 0 20px; color: #00f2ff; font-size: 1.4rem; text-transform: uppercase; }
 
-        @keyframes morph {
-            0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-            50% { border-radius: 50% 50% 30% 70% / 50% 30% 70% 50%; }
-            100% { border-radius: 70% 30% 50% 50% / 30% 70% 30% 70%; }
+        .form-section { 
+            margin: 20px auto; max-width: 850px; background: rgba(255, 255, 255, 0.03); 
+            padding: 40px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.4);
         }
 
-        h2 { font-family: 'Archivo Black', sans-serif; font-size: clamp(1.8rem, 5vw, 3rem); letter-spacing: -2px; margin: 40px 0 30px; background: linear-gradient(to bottom, #312e81, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h3 { font-family: 'Archivo Black', sans-serif; margin: 30px 0 15px; color: #4338ca; font-size: 1.5rem; text-transform: uppercase; }
-
-        .form-section { margin: 20px auto; max-width: 900px; background: #ffffff; padding: 40px; border-radius: 35px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); z-index: 10; position: relative; width: 100%; }
+        button, select, input { 
+            padding: 16px; margin: 10px 0; width: 100%; font-size: 0.95rem; 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
+            background: rgba(0,0,0,0.3); color: white; font-weight: 600; outline: none; 
+        }
         
-        #process_container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        button { 
+            background: #00f2ff; color: #000; border: none; cursor: pointer; 
+            font-weight: 800; text-transform: uppercase; margin-top: 25px; 
+            box-shadow: 0 5px 20px rgba(0, 242, 255, 0.3); transition: 0.3s;
+        }
+        button:hover { transform: translateY(-3px); filter: brightness(1.2); }
 
-        button, select, input { padding: 16px; margin: 10px 0; width: 100%; font-size: 1rem; border: 2px solid #f1f5f9; border-radius: 15px; background-color: white; color: #312e81; font-weight: 600; outline: none; transition: 0.3s; }
-        input::placeholder { color: #94a3b8; }
-        
-        button { background-color: #312e81; color: white; border: none; cursor: pointer; font-weight: 700; text-transform: uppercase; margin-top: 25px; letter-spacing: 1px; }
-        button:hover { background-color: #4338ca; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(49,46,129,0.2); }
+        .table-wrapper { overflow-x: auto; width: 100%; border-radius: 20px; margin-top: 20px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; color: #fff; }
+        th { padding: 18px; color: #00f2ff; font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.03); }
 
-        /* Tables & Gantt Chart - CONSISTENT STYLING */
-        .table-wrapper { overflow-x: auto; width: 100%; border-radius: 20px; margin-top: 20px; }
-        table { border-collapse: separate; border-spacing: 0 10px; width: 100%; min-width: 600px; color: #312e81; }
-        th { padding: 15px; font-family: 'Archivo Black', sans-serif; font-size: 0.8rem; text-transform: uppercase; color: #64748b; }
-        td { background-color: #ffffff; padding: 18px; font-weight: 600; border-bottom: 1px solid #f1f5f9; }
-        td:first-child { border-radius: 12px 0 0 12px; color: #6366f1; }
-        td:last-child { border-radius: 0 12px 12px 0; }
+        .gantt-container { 
+            background: rgba(0,0,0,0.3); padding: 40px; border-radius: 25px; 
+            border: 1px solid rgba(255,255,255,0.05); overflow-x: auto; 
+        }
+        .gantt-block { 
+            height: 55px; margin-right: 4px; display: flex; align-items: center; 
+            justify-content: center; color: #000; font-weight: 800; border-radius: 8px; 
+            background: linear-gradient(135deg, #00f2ff, #a855f7); 
+        }
+        .gantt-time { font-weight: 700; color: #00f2ff; font-size: 0.85rem; margin-top: 10px; }
 
-        .gantt-container { background: #ffffff; padding: 40px; border-radius: 30px; overflow-x: auto; width: 100%; margin: 20px auto; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .gantt-block { height: 50px; margin-right: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; border-radius: 10px; }
-        .gantt-time { font-weight: 700; color: #6366f1; font-size: 0.9rem; margin-top: 10px; }
-
-        .avg-container { background: white; padding: 25px 45px; border-radius: 100px; display: inline-block; margin-top: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-
-        @media (max-width: 768px) {
-            h2 { font-size: 2rem; }
-            .top-menu { top: 10px; width: 95%; padding: 5px 10px; }
-            .back-button { width: calc(100% - 40px); left: 20px; text-align: center; }
-            #process_container { grid-template-columns: 1fr; }
-            body { padding-top: 100px; }
+        .avg-container { 
+            background: rgba(0, 242, 255, 0.1); padding: 25px 50px; border-radius: 100px; 
+            display: inline-block; margin-top: 40px; border: 1px solid rgba(0, 242, 255, 0.2); 
         }
     </style>
 
@@ -125,10 +106,10 @@
             for (let i = 1; i <= num; i++) {
                 let priorityField = (algo === "PRIORITY") ? `Priority:<br><input type="number" name="priority[]" min="1" required>` : "";
                 container.innerHTML += `
-                    <div style="padding:20px; border-top:5px solid #6366f1; background:#f8fafc; border-radius:15px; text-align:left; box-shadow: 0 5px 15px rgba(0,0,0,0.02);">
-                        <strong style="color: #312e81;">Process P${i}:</strong><br><br>
-                        Arrival Time:<input type="number" name="arrival_time[]" placeholder="Enter number of AT" min="0" required>
-                        Burst Time:<input type="number" name="burst_time[]" placeholder="Enter number of BT" min="1" required>
+                    <div style="padding:20px; border-top:4px solid #00f2ff; background:rgba(255,255,255,0.02); border-radius:15px; text-align:left; margin-top:15px;">
+                        <strong style="color: #00f2ff;">Process P${i}:</strong><br><br>
+                        Arrival Time:<input type="number" name="arrival_time[]" placeholder="AT" min="0" required>
+                        Burst Time:<input type="number" name="burst_time[]" placeholder="BT" min="1" required>
                         ${priorityField}
                     </div>
                 `;
@@ -138,17 +119,14 @@
 </head>
 <body>
 
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
-
 <div class="top-menu">
     <a href="preemptive.php">Preemptive</a>
     <a href="#" class="active">Non-Preemptive</a>
 </div>
 
-<a href="indexpage.php" class="back-button">← Back</a>
+<a href="indexpage.php" class="back-button">← BACK</a>
 
-<h2>CPU Scheduling - Non-Preemptive</h2>
+<h2>CPU SCHEDULING</h2>
 <form method="POST">
     <div class="form-section">
         <label><strong>Select Scheduling Algorithm:</strong></label><br>
@@ -161,7 +139,7 @@
         <label><strong>Number of Processes:</strong></label><br>
         <input type="number" name="num_process" id="num_process" min="1" max="20" placeholder="Enter number of processes" onchange="showFields()" required><br>
 
-        <div id="process_container"></div>
+        <div id="process_container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;"></div>
         <button type="submit">Run Scheduling</button>
     </div>
 </form>
@@ -174,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['arrival_time'])) {
     $num = count($arrival);
     $processes = [];
 
-    // DATA GATHERING
     for ($i = 0; $i < $num; $i++) {
         $p = [
             'id' => 'P'.($i+1),
@@ -249,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['arrival_time'])) {
     echo "<div style='display:flex;'>";
     foreach($merged as $b){
         $w=$b['duration']*40;
-        echo "<div class='gantt-block' style='width:{$w}px; min-width:{$w}px; background:linear-gradient(135deg,#6366f1,#a855f7);'>{$b['id']}</div>";
+        echo "<div class='gantt-block' style='width:{$w}px; min-width:{$w}px;'>{$b['id']}</div>";
     }
     echo "</div><div style='display:flex;margin-top:8px;'>";
     $time=0; 
@@ -261,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['arrival_time'])) {
     echo "<div class='gantt-time'>{$time}</div></div></div></div>";
 
     echo "<div class='avg-container'>";
-    echo "<h4 style='color:#312e81;'>Average TAT: <span style='color:#4338ca'>".number_format($total_tat/$num,2)."</span> | Average WT: <span style='color:#4338ca'>".number_format($total_wt/$num,2)."</span></h4>";
+    echo "<h4>Avg TAT: <span style='color:#00f2ff'>".number_format($total_tat/$num,2)."</span> | Avg WT: <span style='color:#00f2ff'>".number_format($total_wt/$num,2)."</span></h4>";
     echo "</div>";
 }
 ?>
