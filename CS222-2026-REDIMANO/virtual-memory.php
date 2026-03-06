@@ -1,23 +1,36 @@
 <?php
 $partitions = [223, 300, 689, 1034, 4302];
 $allocation_result = "";
-$virtual_memory = [];
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$allocated_files = [];
+if (isset($_POST['history'])) {
+    $allocated_files = json_decode($_POST['history'], true);
+}
+if (isset($_POST['reset_memory'])) {
+    $allocated_files = [];
+    $allocation_result = "Memory cleared.";
+} 
+elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['file_size'])) {
     $file_size = (int)$_POST["file_size"];
     $allocated = false;
 
     foreach ($partitions as $partition) {
-        if ($file_size <= $partition) {
-            $allocation_result = "File of {$file_size}KB placed in Virtual Memory (Partition {$partition}KB)";
-            $virtual_memory[] = ["size" => $file_size, "partition" => $partition];
+        $is_occupied = false;
+        foreach ($allocated_files as $saved) {
+            if ($saved['partition'] == $partition) {
+                $is_occupied = true;
+                break;
+            }
+        }
+        if (!$is_occupied && $file_size <= $partition) {
+            $allocated_files[] = ["size" => $file_size, "partition" => $partition];
+            $allocation_result = "File of {$file_size}KB placed in Partition {$partition}KB";
             $allocated = true;
             break;
         }
     }
 
     if (!$allocated) {
-        $allocation_result = "File of {$file_size}KB could not be placed: Not enough space.";
+        $allocation_result = "Not enough space or partition already occupied.";
     }
 }
 ?>
@@ -29,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Allocation</title>
     <style>
-        /* FONTS & COLORS LANG ANG BINAGO */
         @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,7 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-family: 'Inter', sans-serif;
             text-align: center;
             padding: 100px 20px 60px; 
-            /* DARK GRADIENT BACKGROUND */
             background-color: #0d0628;
             background: radial-gradient(circle at 50% 0%, #3b117a 0%, #150833 45%, #0d0628 100%);
             color: #ffffff;
@@ -50,14 +61,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             align-items: center;
         }
 
-        /* NEON GLOW EFFECT */
         body::before {
             content: ''; position: fixed; top: 10%; left: 50%; width: 100%; height: 100%;
             background: radial-gradient(circle, rgba(0, 242, 255, 0.08) 0%, rgba(255, 0, 212, 0.05) 40%, transparent 70%);
             transform: translateX(-50%); z-index: -1; pointer-events: none;
         }
 
-        /* BACK BUTTON SA BABA (PARA SAME SA CPU PAGES) */
         .back-button { 
             position: fixed; bottom: 30px; left: 30px; padding: 12px 25px; 
             font-weight: 700; background: rgba(255,255,255,0.08); color: white; 
@@ -87,13 +96,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
         }
         
+        .button-group { display: flex; gap: 10px; margin-top: 25px; }
+
         button { 
             background: #00f2ff; color: #000; border: none; cursor: pointer; 
-            font-weight: 800; text-transform: uppercase; margin-top: 25px; 
+            font-weight: 800; text-transform: uppercase; 
             padding: 16px; border-radius: 15px; width: 100%;
             box-shadow: 0 5px 20px rgba(0, 242, 255, 0.3); transition: 0.3s;
         }
         button:hover { transform: translateY(-3px); filter: brightness(1.2); }
+
+        button.reset-btn { background: #ff4d4d; color: #fff; box-shadow: 0 5px 20px rgba(255, 77, 77, 0.3); }
 
         .result { 
             font-size: 1rem; margin-bottom: 25px; padding: 15px 30px; 
@@ -124,7 +137,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #000; box-shadow: 0 5px 15px rgba(0, 242, 255, 0.3); 
             border: none;
         }
-
     </style>
 </head>
 <body>
@@ -140,16 +152,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST">
         <label>Enter File Size (KB):</label>
         <input type="text" name="file_size" required pattern="\d+" inputmode="numeric" placeholder="e.g. 512">
-        <button type="submit">Place File</button>
+        
+        <input type="hidden" name="history" value='<?= json_encode($allocated_files) ?>'>
+
+        <div class="button-group">
+            <button type="submit">Place File</button>
+            <button type="submit" name="reset_memory" class="reset-btn" formnovalidate>Reset</button>
+        </div>
     </form>
 
     <div class="container">
         <div class="box">
-            <h2>Primary Memory</h2>
-            <?php if (!empty($virtual_memory)): ?>
-                <div class="partition filled">
-                    File: <?= $virtual_memory[0]["size"] ?>KB
-                </div>
+            <h2>Process Status</h2>
+            <?php if (!empty($allocated_files)): ?>
+                <?php foreach ($allocated_files as $file): ?>
+                    <div class="partition filled">
+                        File: <?= $file["size"] ?>KB (Partition <?= $file["partition"] ?>KB)
+                    </div>
+                <?php endforeach; ?>
             <?php else: ?>
                 <div class="partition">No file placed</div>
             <?php endif; ?>
@@ -161,9 +181,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php
                     $filled = false;
                     $display = "{$partition}KB";
-                    if (!empty($virtual_memory) && $virtual_memory[0]["partition"] == $partition) {
-                        $filled = true;
-                        $display = "{$virtual_memory[0]['size']}KB / {$partition}KB";
+                    foreach ($allocated_files as $saved) {
+                        if ($saved["partition"] == $partition) {
+                            $filled = true;
+                            $display = "{$saved['size']}KB / {$partition}KB";
+                            break;
+                        }
                     }
                 ?>
                 <div class="partition <?= $filled ? 'filled' : '' ?>">
