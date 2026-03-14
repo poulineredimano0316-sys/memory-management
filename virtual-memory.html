@@ -7,144 +7,395 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', sans-serif; text-align: center;
-            padding: 80px 20px 100px;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 80px 20px 90px;
             background: radial-gradient(circle at 50% 0%, #3b117a 0%, #150833 45%, #0d0628 100%);
-            color: #fff; min-height: 100vh; position: relative;
-            display: flex; flex-direction: column; align-items: center;
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         body::before {
             content: ''; position: fixed; top: 10%; left: 50%; width: 100%; height: 100%;
             background: radial-gradient(circle, rgba(0,242,255,0.08) 0%, rgba(255,0,212,0.05) 40%, transparent 70%);
             transform: translateX(-50%); z-index: -1; pointer-events: none;
         }
+
+        /* ── Top Algorithm Nav ── */
+        .top-menu {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(15px);
+            padding: 6px 10px; border-radius: 50px; display: flex; gap: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: calc(100vw - 32px); white-space: nowrap;
+        }
+        .top-menu button {
+            font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.8rem;
+            padding: 7px 14px; border-radius: 40px; border: none; cursor: pointer;
+            color: rgba(255,255,255,0.6); background: none; transition: 0.3s;
+            white-space: nowrap;
+        }
+        .top-menu button.active-ff  { background: #ff9800; color: #000; box-shadow: 0 0 15px rgba(255,152,0,0.5); }
+        .top-menu button.active-bf  { background: #a855f7; color: #fff; box-shadow: 0 0 15px rgba(168,85,247,0.5); }
+        .top-menu button.active-wf  { background: #00bfa5; color: #000; box-shadow: 0 0 15px rgba(0,191,165,0.5); }
+
+        /* ── Back Button ── */
         .back-button {
-            position: fixed; bottom: 30px; left: 30px; padding: 12px 25px;
-            font-weight: 700; background: rgba(255,255,255,0.08); color: white;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 11px 24px; font-weight: 700; font-family: 'Inter', sans-serif;
+            background: rgba(255,255,255,0.08); color: white;
             border-radius: 100px; text-decoration: none; backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; z-index: 1100; font-family: 'Inter', sans-serif;
+            border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; z-index: 1100;
+            font-size: 0.9rem; white-space: nowrap;
         }
-        .back-button:hover { background: #00f2ff; color: #000; transform: translateY(-3px); }
+        .back-button:hover { background: #00f2ff; color: #000; transform: translateX(-50%) translateY(-3px); }
+
+        /* ── Page Title ── */
         h1 {
-            font-family: 'Archivo Black', sans-serif; font-size: clamp(2rem,6vw,3.5rem);
-            margin-bottom: 40px; text-transform: uppercase; letter-spacing: -1px;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: clamp(1.8rem, 6vw, 3.5rem);
+            margin-bottom: 10px; text-transform: uppercase; letter-spacing: -1px;
         }
-        form {
-            margin-bottom: 40px; background: rgba(255,255,255,0.03);
-            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            width: 100%; max-width: 500px;
+        .algo-subtitle {
+            font-size: 0.9rem; font-weight: 600; margin-bottom: 30px;
+            padding: 6px 20px; border-radius: 100px; display: inline-block;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
         }
-        label { font-weight: 700; color: #00f2ff; display: block; margin-bottom: 15px; font-size: 0.95rem; }
-        input[type="number"] {
-            padding: 16px; margin: 10px 0; width: 100%; font-size: 1rem;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
-            background: rgba(0,0,0,0.3); color: white; font-weight: 600; outline: none; text-align: center; font-family: 'Inter', sans-serif;
+
+        /* ── Input Card ── */
+        .input-card {
+            background: rgba(255,255,255,0.03); padding: 28px 24px; border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); width: 100%; max-width: 560px;
+            margin-bottom: 30px;
         }
-        button {
-            background: #00f2ff; color: #000; border: none; cursor: pointer;
-            font-weight: 800; text-transform: uppercase; margin-top: 25px;
-            padding: 16px; border-radius: 15px; width: 100%; font-size: 0.95rem;
-            box-shadow: 0 5px 20px rgba(0,242,255,0.3); transition: 0.3s; font-family: 'Inter', sans-serif;
+        .input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        .input-card input[type="number"] {
+            flex: 1; min-width: 140px; padding: 13px 16px; font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+            background: rgba(0,0,0,0.3); color: white; font-weight: 600;
+            outline: none; font-family: 'Inter', sans-serif; text-align: center;
+            transition: border-color 0.3s; width: 100%;
         }
-        button:hover { transform: translateY(-3px); filter: brightness(1.2); }
-        .result {
-            font-size: 1rem; margin-bottom: 30px; padding: 15px 30px;
-            background: rgba(0,242,255,0.1); border-radius: 100px;
-            color: #00f2ff; font-weight: 700; border: 1px solid rgba(0,242,255,0.3);
-            max-width: 600px; width: 100%;
+        .input-card input[type="number"]:focus { border-color: #00f2ff; }
+
+        /* ── Action Buttons ── */
+        .btn {
+            padding: 13px 20px; border-radius: 14px; border: none; cursor: pointer;
+            font-weight: 800; font-size: 0.82rem; font-family: 'Inter', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s;
+            white-space: nowrap;
         }
-        .result.error { background: rgba(255,60,100,0.1); color: #ff6b8a; border-color: rgba(255,60,100,0.3); }
-        .container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; width: 100%; max-width: 1000px; }
-        .box {
-            flex: 1; min-width: 280px; background: rgba(255,255,255,0.03);
-            padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08);
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+        .btn-add    { background: #00f2ff; color: #000; box-shadow: 0 4px 15px rgba(0,242,255,0.3); }
+        .btn-alloc  { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-alloc:hover { background: rgba(255,255,255,0.2); border-color: #00f2ff; }
+        .btn-reset  { background: rgba(255,60,80,0.15); color: #ff6b8a; border: 1px solid rgba(255,60,80,0.3); }
+        .btn-reset:hover { background: rgba(255,60,80,0.3); }
+
+        /* ── Tables Layout ── */
+        .tables-wrapper {
+            display: flex; justify-content: center; gap: 16px;
+            flex-wrap: wrap; width: 100%; max-width: 1100px;
         }
-        .box h2 {
-            font-family: 'Archivo Black', sans-serif; font-size: 1.3rem;
-            margin-bottom: 20px; color: #00f2ff; text-transform: uppercase;
+        .panel {
+            background: rgba(255,255,255,0.03); padding: 22px 18px; border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.08); flex: 1; min-width: 0;
+            width: 100%; overflow-x: auto;
         }
-        .partition {
-            padding: 15px; margin: 10px 0; border-radius: 12px;
-            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7);
-            font-weight: 700; border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s ease;
+        .panel.main-panel { flex: 2; }
+        .panel h3 {
+            font-family: 'Archivo Black', sans-serif; font-size: 0.95rem;
+            text-transform: uppercase; color: #00f2ff; margin-bottom: 16px; letter-spacing: 0.5px;
         }
-        .filled {
-            background: linear-gradient(135deg, #00f2ff, #a855f7);
-            color: #000; box-shadow: 0 5px 15px rgba(0,242,255,0.3); border: none;
-            animation: pop 0.4s ease;
+
+        /* ── Table Styles ── */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th {
+            padding: 11px 8px; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #00f2ff;
         }
-        @keyframes pop { 0%{transform:scale(0.9);opacity:0;} 100%{transform:scale(1);opacity:1;} }
-        #result-area { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        td { padding: 11px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); word-break: break-word; }
+        tr:last-child td { border-bottom: none; }
+        tr.allocated td { color: #000; font-weight: 700; }
+        tr.allocated { background: linear-gradient(135deg, rgba(0,242,255,0.85), rgba(168,85,247,0.85)); border-radius: 10px; }
+        tr.failed td { color: #ff6b8a; }
+
+        .status-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 100px;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+        }
+        .badge-waiting  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+        .badge-ok       { background: rgba(0,242,255,0.15); color: #00f2ff; }
+        .badge-fail     { background: rgba(255,60,80,0.15); color: #ff6b8a; }
+        .badge-free     { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45); }
+        .badge-alloc    { background: rgba(0,242,255,0.15); color: #00f2ff; }
+
+        /* ── Log Panel ── */
+        .log-box {
+            text-align: left; background: rgba(0,0,0,0.3);
+            padding: 14px; border-radius: 14px; height: 240px;
+            overflow-y: auto; font-size: 0.78rem; line-height: 1.7;
+            color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.05);
+        }
+        .log-box::-webkit-scrollbar { width: 4px; }
+        .log-box::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.3); border-radius: 4px; }
+        .log-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .log-entry.ok   { color: #00f2ff; }
+        .log-entry.fail { color: #ff6b8a; }
+        .log-entry.info { color: rgba(255,255,255,0.5); }
+
+        /* ── Responsive ── */
+        @media (max-width: 700px) {
+            body { padding: 72px 14px 90px; }
+            .tables-wrapper { flex-direction: column; gap: 14px; }
+            .panel { min-width: 0; width: 100%; }
+            .input-card { padding: 22px 16px; }
+            .input-row { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; text-align: center; }
+            .btn-add { width: 100%; }
+        }
+        @media (max-width: 400px) {
+            .top-menu button { padding: 6px 10px; font-size: 0.72rem; }
+            h1 { font-size: 1.6rem; letter-spacing: -0.5px; }
+        }
     </style>
 </head>
 <body>
+
+<!-- Top algo switcher -->
+<div class="top-menu">
+    <button id="btn-ff" class="active-ff" onclick="switchAlgo('FF')">First Fit</button>
+    <button id="btn-bf" onclick="switchAlgo('BF')">Best Fit</button>
+    <button id="btn-wf" onclick="switchAlgo('WF')">Worst Fit</button>
+</div>
+
 <a href="index.html" class="back-button">← BACK</a>
-<h1>VIRTUAL MEMORY</h1>
 
-<div id="result-area"></div>
+<h1>MEMORY ALLOCATION</h1>
+<div class="algo-subtitle" id="algo-label">First Fit Algorithm</div>
 
-<form onsubmit="placeFile(event)">
-    <label>Enter File Size (KB):</label>
-    <input type="number" id="file_size" min="1" placeholder="e.g. 512" required>
-    <button type="submit">Place File</button>
-</form>
-
-<div class="container">
-    <div class="box">
-        <h2>Primary Memory</h2>
-        <div id="primary-memory"><div class="partition">No file placed</div></div>
+<!-- Input Card -->
+<div class="input-card">
+    <div class="input-row">
+        <input type="number" id="process-size" placeholder="Process size (KB)" min="1">
+        <button class="btn btn-add" onclick="addProcess()">+ Add Process</button>
     </div>
-    <div class="box">
-        <h2>Virtual Memory</h2>
-        <div id="virtual-partitions"></div>
+    <div class="input-row" style="margin-top:16px;">
+        <button class="btn btn-alloc" onclick="allocateAll()">▶ Allocate All</button>
+        <button class="btn btn-reset" onclick="resetAll()">↺ Reset All</button>
+    </div>
+</div>
+
+<!-- Tables -->
+<div class="tables-wrapper">
+    <!-- Process Table -->
+    <div class="panel">
+        <h3>Processes</h3>
+        <table>
+            <thead><tr><th>Process</th><th>Size</th><th>Status</th></tr></thead>
+            <tbody id="process-table"><tr><td colspan="3" style="color:rgba(255,255,255,0.3);font-size:0.8rem;">No processes added</td></tr></tbody>
+        </table>
+    </div>
+
+    <!-- Memory Block Table -->
+    <div class="panel main-panel">
+        <h3>Memory Blocks</h3>
+        <table>
+            <thead><tr><th>Block #</th><th>Size (KB)</th><th>Allocated To</th><th>Status</th></tr></thead>
+            <tbody id="block-table"></tbody>
+        </table>
+    </div>
+
+    <!-- Log Panel -->
+    <div class="panel">
+        <h3>Allocation Log</h3>
+        <div class="log-box" id="log-box">
+            <div class="log-entry info">> System ready. Add processes to begin.</div>
+        </div>
     </div>
 </div>
 
 <script>
-    const PARTITIONS = [223, 300, 689, 1034, 4302];
-    let placedFile = null;
+    // ── State ────────────────────────────────────────────────────
+    const BLOCK_SIZES = [64, 128, 256, 512, 1024];
+    let currentAlgo = 'FF';
+    let blocks = [];
+    let processes = [];
+    let processCounter = 1;
 
-    function renderPartitions() {
-        const container = document.getElementById('virtual-partitions');
-        container.innerHTML = PARTITIONS.map(p => {
-            const filled = placedFile && placedFile.partition === p;
-            const display = filled ? `${placedFile.size}KB / ${p}KB` : `${p}KB`;
-            return `<div class="partition ${filled ? 'filled' : ''}">${display}</div>`;
+    const ALGO_LABELS = {
+        FF: 'First Fit Algorithm',
+        BF: 'Best Fit Algorithm',
+        WF: 'Worst Fit Algorithm'
+    };
+
+    // ── Init ─────────────────────────────────────────────────────
+    function initBlocks() {
+        blocks = BLOCK_SIZES.map((size, i) => ({
+            id: i + 1, size, allocated: false, processName: null
+        }));
+    }
+
+    function resetAll() {
+        initBlocks();
+        processes = [];
+        processCounter = 1;
+        renderBlockTable();
+        renderProcessTable();
+        log('Memory blocks and processes have been reset.', 'info');
+    }
+
+    // ── Algo Switch ───────────────────────────────────────────────
+    function switchAlgo(algo) {
+        currentAlgo = algo;
+        document.getElementById('algo-label').textContent = ALGO_LABELS[algo];
+
+        // Update tab active states
+        ['ff','bf','wf'].forEach(a => {
+            document.getElementById(`btn-${a}`).className = '';
+        });
+        const classMap = { FF: 'active-ff', BF: 'active-bf', WF: 'active-wf' };
+        document.getElementById(`btn-${algo.toLowerCase()}`).className = classMap[algo];
+
+        // Reset on algo switch
+        resetAll();
+        log(`Switched to ${ALGO_LABELS[algo]}.`, 'info');
+    }
+
+    // ── Add Process ───────────────────────────────────────────────
+    function addProcess() {
+        const input = document.getElementById('process-size');
+        const size = parseInt(input.value);
+        if (!size || size <= 0) { input.focus(); return; }
+
+        const name = `P${processCounter++}`;
+        processes.push({ name, size, allocated: null });
+        renderProcessTable();
+        log(`Added process ${name} (${size}KB).`, 'info');
+        input.value = '';
+        input.focus();
+    }
+
+    // Allow Enter key on input
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('process-size').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addProcess();
+        });
+        initBlocks();
+        renderBlockTable();
+    });
+
+    // ── Allocate All ──────────────────────────────────────────────
+    function allocateAll() {
+        if (!processes.length) { log('No processes to allocate.', 'info'); return; }
+
+        processes.forEach(proc => {
+            if (proc.allocated === true) return;
+
+            let targetIndex = -1;
+
+            if (currentAlgo === 'FF') {
+                // First Fit: first block that fits
+                for (let i = 0; i < blocks.length; i++) {
+                    if (!blocks[i].allocated && blocks[i].size >= proc.size) {
+                        targetIndex = i; break;
+                    }
+                }
+            } else if (currentAlgo === 'BF') {
+                // Best Fit: smallest block that fits
+                let bestSize = Infinity;
+                for (let i = 0; i < blocks.length; i++) {
+                    if (!blocks[i].allocated && blocks[i].size >= proc.size && blocks[i].size < bestSize) {
+                        bestSize = blocks[i].size; targetIndex = i;
+                    }
+                }
+            } else if (currentAlgo === 'WF') {
+                // Worst Fit: largest block that fits
+                let worstSize = -1;
+                for (let i = 0; i < blocks.length; i++) {
+                    if (!blocks[i].allocated && blocks[i].size >= proc.size && blocks[i].size > worstSize) {
+                        worstSize = blocks[i].size; targetIndex = i;
+                    }
+                }
+            }
+
+            if (targetIndex !== -1) {
+                blocks[targetIndex].allocated = true;
+                blocks[targetIndex].processName = proc.name;
+                proc.allocated = true;
+                log(`${proc.name} (${proc.size}KB) → Block ${targetIndex + 1} (${blocks[targetIndex].size}KB) [${ALGO_LABELS[currentAlgo].split(' ')[0]} Fit].`, 'ok');
+            } else {
+                proc.allocated = false;
+                log(`${proc.name} (${proc.size}KB) — No suitable block found.`, 'fail');
+            }
+        });
+
+        renderBlockTable();
+        renderProcessTable();
+    }
+
+    // ── Render Block Table ────────────────────────────────────────
+    function renderBlockTable() {
+        const tbody = document.getElementById('block-table');
+        tbody.innerHTML = blocks.map((b, i) => {
+            const proc = b.allocated ? processes.find(p => p.name === b.processName) : null;
+            const displaySize = proc ? `${proc.size}KB / ${b.size}KB` : `${b.size}KB`;
+            const rowClass = b.allocated ? 'allocated' : '';
+            const badge = b.allocated
+                ? `<span class="status-badge badge-alloc">Allocated</span>`
+                : `<span class="status-badge badge-free">Free</span>`;
+            return `<tr class="${rowClass}">
+                <td><strong>Block ${b.id}</strong></td>
+                <td>${displaySize}</td>
+                <td>${b.allocated ? `<strong>${b.processName}</strong>` : '—'}</td>
+                <td>${badge}</td>
+            </tr>`;
         }).join('');
     }
 
-    function renderPrimary() {
-        const el = document.getElementById('primary-memory');
-        el.innerHTML = placedFile
-            ? `<div class="partition filled">File: ${placedFile.size}KB</div>`
-            : `<div class="partition">No file placed</div>`;
+    // ── Render Process Table ──────────────────────────────────────
+    function renderProcessTable() {
+        const tbody = document.getElementById('process-table');
+        if (!processes.length) {
+            tbody.innerHTML = '<tr><td colspan="3" style="color:rgba(255,255,255,0.3);font-size:0.8rem;">No processes added</td></tr>';
+            return;
+        }
+        tbody.innerHTML = processes.map(p => {
+            let badge = '';
+            const rowClass = p.allocated === false ? 'failed' : '';
+            if (p.allocated === null)  badge = `<span class="status-badge badge-waiting">Waiting</span>`;
+            else if (p.allocated)      badge = `<span class="status-badge badge-ok">Allocated</span>`;
+            else                       badge = `<span class="status-badge badge-fail">Failed</span>`;
+            return `<tr class="${rowClass}">
+                <td><strong>${p.name}</strong></td>
+                <td>${p.size}KB</td>
+                <td>${badge}</td>
+            </tr>`;
+        }).join('');
     }
 
-    function placeFile(e) {
-        e.preventDefault();
-        const size = parseInt(document.getElementById('file_size').value);
-        const resultArea = document.getElementById('result-area');
-        placedFile = null;
-
-        let allocated = false;
-        for (const p of PARTITIONS) {
-            if (size <= p) {
-                placedFile = { size, partition: p };
-                allocated = true;
-                resultArea.innerHTML = `<div class="result">✔ File of ${size}KB placed in Virtual Memory (Partition ${p}KB)</div>`;
-                break;
-            }
-        }
-        if (!allocated) {
-            resultArea.innerHTML = `<div class="result error">✘ File of ${size}KB could not be placed: Not enough space.</div>`;
-        }
-        renderPartitions();
-        renderPrimary();
+    // ── Log ───────────────────────────────────────────────────────
+    function log(msg, type = 'info') {
+        const box = document.getElementById('log-box');
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.textContent = `> ${msg}`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
     }
 
-    renderPartitions();
+    // ── Boot ──────────────────────────────────────────────────────
+    initBlocks();
+    renderBlockTable();
 </script>
 </body>
 </html>
